@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Design Tokens — Mnar Photofilm
+   ============================================================ */
+:root {
+  /* Brand palette — warm gold on deep dark */
+  --color-brand-gold: #c9a96e;
+  --color-brand-gold-light: #e8d5a3;
+  --color-brand-gold-dark: #9a7a45;
+  --color-brand-cream: #f5f0e8;
+
+  /* Surfaces */
+  --color-surface-0: #0a0a0f;
+  --color-surface-1: #111118;
+  --color-surface-2: #1a1a25;
+  --color-surface-3: #24242f;
+  --color-surface-4: #2e2e3a;
+
+  /* Text */
+  --color-text-primary: #f0ede8;
+  --color-text-secondary: #a09b94;
+  --color-text-muted: #6b6560;
+
+  /* Borders */
+  --color-border: rgba(201, 169, 110, 0.12);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+
+  /* Fonts */
+  --font-arabic: var(--font-cairo), 'Cairo', system-ui, sans-serif;
+  --font-numeric: var(--font-inter), 'Inter', system-ui, sans-serif;
+}
+
+/* ============================================================
+   Base Reset & Typography
+   ============================================================ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-arabic);
+  background-color: var(--color-surface-0);
+  color: var(--color-text-primary);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Numbers and Latin characters render with Inter */
+.ltr-content,
+[dir="ltr"],
+time,
+.price,
+.number {
+  font-family: var(--font-numeric);
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* ============================================================
+   Utility Classes
+   ============================================================ */
+
+/* Glass morphism card */
+.glass {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.glass-gold {
+  background: rgba(201, 169, 110, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(201, 169, 110, 0.15);
+}
+
+/* Gold gradient text */
+.text-gold-gradient {
+  background: linear-gradient(135deg, var(--color-brand-gold-light), var(--color-brand-gold), var(--color-brand-gold-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow effects */
+.glow-gold {
+  box-shadow: 0 0 40px rgba(201, 169, 110, 0.15), 0 0 80px rgba(201, 169, 110, 0.05);
+}
+
+.glow-gold-sm {
+  box-shadow: 0 0 20px rgba(201, 169, 110, 0.12);
+}
+
+/* Premium shadow */
+.shadow-premium {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.shadow-premium-lg {
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6), 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================
+   Scrollbar Styling
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-gold-dark);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-gold);
+}
+
+/* ============================================================
+   Focus Styles
+   ============================================================ */
+:focus-visible {
+  outline: 2px solid var(--color-brand-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============================================================
+   Form Inputs — Admin
+   ============================================================ */
+.input-field {
+  width: 100%;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--color-text-primary);
+  font-family: var(--font-arabic);
+  font-size: 0.95rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: rgba(201, 169, 110, 0.5);
+  box-shadow: 0 0 0 3px rgba(201, 169, 110, 0.08);
+}
+
+.input-field::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* Select */
+.select-field {
+  appearance: none;
+  cursor: pointer;
+}
+
+/* ============================================================
+   Animations
+   ============================================================ */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-2) 25%,
+    var(--color-surface-3) 50%,
+    var(--color-surface-2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 0.4; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-in-out infinite;
+}
