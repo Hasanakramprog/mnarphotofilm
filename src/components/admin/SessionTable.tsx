@@ -2,10 +2,10 @@
 
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Filter, Pencil, Trash2, Phone } from 'lucide-react';
+import { Search, Pencil, Trash2, Phone } from 'lucide-react';
 import type { Session } from '@/types/session';
 import { STATUS_COLORS, STATUS_LABELS } from '@/types/session';
-import { formatArabicDate, formatTime, formatPrice, getWhatsAppUrl, formatPhone } from '@/lib/utils';
+import { formatDate, formatTime, formatPrice, getWhatsAppUrl, formatPhone } from '@/lib/utils';
 
 interface SessionTableProps {
   sessions: Session[];
@@ -43,23 +43,17 @@ export default function SessionTable({ sessions, onEdit, onDelete }: SessionTabl
   const sorted = useMemo(() => [...filtered].sort((a, b) => a.date.localeCompare(b.date)), [filtered]);
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden"
-      style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-border-subtle)' }}
-    >
+    <div className="rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm">
       {/* Filters bar */}
-      <div
-        className="flex flex-wrap items-center gap-3 px-5 py-4"
-        style={{ borderBottom: '1px solid var(--color-border-subtle)' }}
-      >
+      <div className="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-slate-200 bg-slate-50/50">
         {/* Search */}
-        <div className="relative flex-1 min-w-[180px]">
-          <Search size={15} className="absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none" style={{ color: 'var(--color-text-muted)' }} />
+        <div className="relative flex-1 min-w-[200px]">
+          <Search size={15} className="absolute top-1/2 -translate-y-1/2 left-3 pointer-events-none text-slate-400" />
           <input
             id="session-table-search"
             type="search"
-            placeholder="بحث..."
-            className="input-field ps-9"
+            placeholder="Search client, phone, location..."
+            className="input-field pl-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -68,45 +62,44 @@ export default function SessionTable({ sessions, onEdit, onDelete }: SessionTabl
         {/* Status filter */}
         <select
           id="session-table-status-filter"
-          className="input-field select-field w-auto"
+          className="input-field select-field w-auto font-medium"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
-          <option value="all">كل الحالات</option>
-          <option value="confirmed">مؤكد</option>
-          <option value="pending">معلّق</option>
-          <option value="completed">مكتمل</option>
-          <option value="cancelled">ملغى</option>
+          <option value="all">All Statuses</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="pending">Pending</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
         </select>
 
         {/* Month filter */}
         <select
           id="session-table-month-filter"
-          className="input-field select-field w-auto"
+          className="input-field select-field w-auto font-medium"
           value={monthFilter}
           onChange={(e) => setMonthFilter(e.target.value)}
         >
-          <option value={ALL_MONTHS_KEY}>كل الأشهر</option>
+          <option value={ALL_MONTHS_KEY}>All Months</option>
           {months.map((m) => (
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
 
-        <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-          {sorted.length} نتيجة
+        <span className="text-xs font-semibold text-slate-500 bg-slate-200/60 px-2.5 py-1 rounded-full">
+          {sorted.length} {sorted.length === 1 ? 'result' : 'results'}
         </span>
       </div>
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm" style={{ direction: 'rtl' }}>
+        <table className="w-full text-sm text-left">
           <thead>
-            <tr style={{ borderBottom: '1px solid var(--color-border-subtle)', background: 'var(--color-surface-2)' }}>
-              {['العميل', 'الهاتف / واتساب', 'التاريخ', 'الساعة', 'النوع', 'اللوكيشن', 'السعر', 'الحالة', ''].map((h) => (
+            <tr className="border-b border-slate-200 bg-slate-100/70 text-slate-600">
+              {['Client', 'Phone / WhatsApp', 'Date', 'Time', 'Type', 'Location', 'Price', 'Status', 'Actions'].map((h) => (
                 <th
                   key={h}
-                  className="px-4 py-3 text-right font-medium text-xs whitespace-nowrap"
-                  style={{ color: 'var(--color-text-muted)' }}
+                  className="px-4 py-3 font-semibold text-xs whitespace-nowrap"
                 >
                   {h}
                 </th>
@@ -116,8 +109,8 @@ export default function SessionTable({ sessions, onEdit, onDelete }: SessionTabl
           <tbody>
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={9} className="text-center py-12" style={{ color: 'var(--color-text-muted)' }}>
-                  لا توجد نتائج
+                <td colSpan={9} className="text-center py-12 text-slate-500 font-medium">
+                  No sessions found matching your filter
                 </td>
               </tr>
             ) : (
@@ -127,69 +120,62 @@ export default function SessionTable({ sessions, onEdit, onDelete }: SessionTabl
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: i * 0.02 }}
-                  className="transition-colors"
-                  style={{ borderBottom: '1px solid var(--color-border-subtle)' }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                  className="border-b border-slate-100 hover:bg-slate-50 transition-colors"
                 >
-                  <td className="px-4 py-3 font-medium whitespace-nowrap" style={{ color: 'var(--color-text-primary)' }}>
+                  <td className="px-4 py-3.5 font-bold text-slate-900 whitespace-nowrap">
                     {s.client_name}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap">
+                  <td className="px-4 py-3.5 whitespace-nowrap">
                     {s.client_phone ? (
                       <a
                         href={getWhatsAppUrl(s.client_phone) ?? '#'}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 hover:bg-emerald-500/20 transition-colors ltr-content"
-                        title="محادثة واتساب"
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors"
+                        title="Chat on WhatsApp"
                       >
                         <Phone size={12} />
                         <span>{formatPhone(s.client_phone)}</span>
                       </a>
                     ) : (
-                      <span className="text-xs" style={{ color: 'var(--color-text-muted)' }}>—</span>
+                      <span className="text-xs text-slate-400">—</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap ltr-content" style={{ color: 'var(--color-text-secondary)' }}>
-                    {formatArabicDate(s.date)}
+                  <td className="px-4 py-3.5 whitespace-nowrap text-slate-700 font-medium">
+                    {formatDate(s.date)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap ltr-content" style={{ color: 'var(--color-text-secondary)' }}>
+                  <td className="px-4 py-3.5 whitespace-nowrap text-slate-700 font-medium">
                     {formatTime(s.time)}
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap" style={{ color: 'var(--color-text-secondary)' }}>
+                  <td className="px-4 py-3.5 whitespace-nowrap text-slate-700 font-medium">
                     {s.session_type}
                   </td>
-                  <td className="px-4 py-3" style={{ color: 'var(--color-text-secondary)', maxWidth: 160 }}>
+                  <td className="px-4 py-3.5 text-slate-600 max-w-[180px]">
                     <span className="line-clamp-1">{s.location || '—'}</span>
                   </td>
-                  <td className="px-4 py-3 whitespace-nowrap ltr-content" style={{ color: 'var(--color-text-secondary)' }}>
+                  <td className="px-4 py-3.5 whitespace-nowrap font-semibold text-slate-800">
                     {formatPrice(s.price_numeric, s.price_text)}
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2.5 py-1 rounded-full border whitespace-nowrap ${STATUS_COLORS[s.status]}`}>
+                  <td className="px-4 py-3.5">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border whitespace-nowrap ${STATUS_COLORS[s.status]}`}>
                       {STATUS_LABELS[s.status]}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3.5">
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => onEdit(s)}
-                        className="p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-                        style={{ color: 'var(--color-text-muted)' }}
-                        aria-label="تعديل"
+                        className="p-1.5 rounded-lg hover:bg-slate-200/80 text-slate-600 transition-colors cursor-pointer"
+                        aria-label="Edit"
                         id={`edit-session-${s.id}`}
                       >
                         <Pencil size={14} />
                       </button>
                       <button
                         onClick={() => onDelete(s.id)}
-                        className="p-1.5 rounded-lg transition-colors cursor-pointer"
-                        style={{ color: '#ef4444' }}
-                        aria-label="حذف"
+                        className="p-1.5 rounded-lg hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
+                        aria-label="Delete"
                         id={`delete-session-${s.id}`}
-                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)'; }}
-                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                       >
                         <Trash2 size={14} />
                       </button>

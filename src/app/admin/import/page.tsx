@@ -2,14 +2,13 @@
 
 export const dynamic = 'force-dynamic';
 
-
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, FileText, Check, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
+import { Upload, FileText, Check, AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 import { parseCSV } from '@/lib/utils';
 import type { SessionInsert } from '@/types/session';
 
-/** Map common Arabic column names to our schema fields */
+/** Map common column names to our schema fields */
 function mapRow(row: Record<string, string>): Partial<SessionInsert> {
   const get = (...keys: string[]) => {
     for (const k of keys) {
@@ -19,14 +18,12 @@ function mapRow(row: Record<string, string>): Partial<SessionInsert> {
     return '';
   };
 
-  const dateRaw = get('التاريخ', 'date', 'Date');
+  const dateRaw = get('date', 'Date', 'التاريخ');
   // Try to parse dates in various formats → normalize to YYYY-MM-DD
   let date = dateRaw;
   if (dateRaw && !dateRaw.match(/^\d{4}-\d{2}-\d{2}$/)) {
-    // Try DD/MM/YYYY or MM/DD/YYYY
     const parts = dateRaw.split(/[\/\-\.]/);
     if (parts.length === 3) {
-      // Assume DD/MM/YYYY if first part ≤ 31
       const [d, m, y] = parts.map((p) => p.padStart(2, '0'));
       if (parseInt(y) > 1900) {
         date = `${y}-${m}-${d}`;
@@ -36,19 +33,19 @@ function mapRow(row: Record<string, string>): Partial<SessionInsert> {
     }
   }
 
-  const priceRaw = get('السعر', 'price', 'Price');
+  const priceRaw = get('price', 'Price', 'السعر');
   const priceNumeric = parseFloat(priceRaw.replace(/[^\d.]/g, ''));
 
   return {
-    client_name: get('الإسم', 'اسم', 'client_name', 'Client'),
-    client_phone: get('رقم الهاتف', 'هاتف', 'الواتساب', 'واتساب', 'client_phone', 'phone', 'mobile') || null,
+    client_name: get('client_name', 'Client', 'Client Name', 'name', 'Name', 'الإسم', 'اسم'),
+    client_phone: get('client_phone', 'phone', 'Phone', 'mobile', 'Mobile', 'whatsapp', 'رقم الهاتف', 'هاتف', 'الواتساب') || null,
     date: date || '',
-    location: get('اللوكيشن', 'location', 'Location'),
-    time: get('الساعة', 'time', 'Time') || null,
-    session_type: get('نوع التصوير', 'session_type', 'Type') || 'جلسة تصوير',
+    location: get('location', 'Location', 'اللوكيشن'),
+    time: get('time', 'Time', 'الساعة') || null,
+    session_type: get('session_type', 'Type', 'Session Type', 'نوع التصوير') || 'Photo Shoot',
     price_text: priceRaw.match(/[^\d.\s]/) ? priceRaw : null,
     price_numeric: isNaN(priceNumeric) ? null : priceNumeric,
-    notes: get('notes', 'ملاحظات') || null,
+    notes: get('notes', 'Notes', 'ملاحظات') || null,
     status: 'confirmed',
   };
 }
@@ -68,22 +65,20 @@ export default function ImportScreen() {
     setParseError('');
     try {
       let parsed: Record<string, string>[] = [];
-      // Try JSON first
       try {
         const json = JSON.parse(rawText);
         parsed = Array.isArray(json) ? json : [json];
       } catch {
-        // Fall back to CSV
         parsed = parseCSV(rawText);
       }
       if (parsed.length === 0) {
-        setParseError('لم يتم العثور على بيانات صالحة. تأكد من صحة CSV أو JSON.');
+        setParseError('No valid data found. Please check your CSV or JSON formatting.');
         return;
       }
       setRows(parsed.map(mapRow));
       setStep('preview');
-    } catch (e) {
-      setParseError('خطأ في تحليل البيانات. تأكد من صحة التنسيق.');
+    } catch {
+      setParseError('Error parsing data. Please verify the format.');
     }
   }
 
@@ -110,30 +105,29 @@ export default function ImportScreen() {
       setResult(data);
       setStep('done');
     } catch {
-      setParseError('خطأ في الاستيراد. حاول مرة أخرى.');
+      setParseError('Failed to import data. Please try again.');
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen px-4 py-12" style={{ background: 'var(--color-surface-0)' }}>
+    <div className="min-h-screen px-4 py-12 bg-slate-50">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-8">
           <a
             href="/admin"
-            className="inline-flex items-center gap-2 text-sm mb-4 transition-colors"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="inline-flex items-center gap-2 text-sm font-semibold mb-4 text-slate-500 hover:text-amber-700 transition-colors"
           >
-            <ArrowRight size={14} />
-            العودة للوحة الإدارة
+            <ArrowLeft size={16} />
+            Back to Admin Dashboard
           </a>
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-            استيراد الجلسات
+          <h1 className="text-3xl font-extrabold text-slate-900">
+            Import Sessions
           </h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
-            الصق بيانات CSV أو JSON لاستيراد جلسات متعددة دفعةً واحدة
+          <p className="text-sm mt-1 text-slate-500 font-medium">
+            Paste CSV or JSON data to bulk import photo sessions at once
           </p>
         </div>
 
@@ -141,22 +135,18 @@ export default function ImportScreen() {
         <AnimatePresence mode="wait">
           {step === 'upload' && (
             <motion.div key="upload" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-              <div
-                className="rounded-2xl p-6 mb-4"
-                style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-border-subtle)' }}
-              >
-                <p className="text-sm font-medium mb-3" style={{ color: 'var(--color-text-secondary)' }}>
-                  الصق بيانات CSV أو JSON هنا:
+              <div className="rounded-2xl p-6 mb-6 bg-white border border-slate-200 shadow-sm">
+                <p className="text-sm font-semibold text-slate-700 mb-3">
+                  Paste CSV or JSON data below:
                 </p>
                 <textarea
                   id="import-text-area"
                   rows={10}
                   className="input-field font-mono text-xs"
-                  placeholder={`الإسم,التاريخ,الساعة,اللوكيشن,نوع التصوير,السعر\nأحمد وسمر,2026-09-15,17:00,البيت,جلسة تصوير,350`}
+                  placeholder={`client_name,date,time,location,session_type,price\nJohn & Mary,2026-09-15,17:00,Studio & Outdoor,Photo Shoot,350`}
                   value={rawText}
                   onChange={(e) => setRawText(e.target.value)}
-                  dir="ltr"
-                  style={{ fontFamily: 'var(--font-numeric)', resize: 'vertical' }}
+                  style={{ resize: 'vertical' }}
                 />
 
                 <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -164,14 +154,9 @@ export default function ImportScreen() {
                     id="import-file-btn"
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium cursor-pointer transition-colors"
-                    style={{
-                      background: 'var(--color-surface-2)',
-                      border: '1px solid var(--color-border-subtle)',
-                      color: 'var(--color-text-secondary)',
-                    }}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
                   >
-                    <FileText size={14} /> رفع ملف CSV/JSON
+                    <FileText size={15} /> Upload CSV / JSON File
                   </button>
                   <input
                     ref={fileRef}
@@ -187,48 +172,38 @@ export default function ImportScreen() {
                     type="button"
                     onClick={handleTextParse}
                     disabled={!rawText.trim()}
-                    className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-semibold cursor-pointer transition-all disabled:opacity-50"
-                    style={{
-                      background: 'linear-gradient(135deg, var(--color-brand-gold-dark), var(--color-brand-gold))',
-                      color: '#0a0a0f',
-                    }}
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:from-amber-700 hover:to-amber-600 shadow-sm transition-all cursor-pointer disabled:opacity-50"
                   >
-                    <Upload size={14} /> معاينة البيانات
+                    <Upload size={15} /> Preview Data
                   </button>
                 </div>
 
                 {parseError && (
-                  <div
-                    className="mt-4 flex items-center gap-2 text-sm p-3 rounded-lg"
-                    style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}
-                  >
-                    <AlertCircle size={14} /> {parseError}
+                  <div className="mt-4 flex items-center gap-2 text-sm p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-medium">
+                    <AlertCircle size={15} /> {parseError}
                   </div>
                 )}
               </div>
 
               {/* Supported columns reference */}
-              <div
-                className="rounded-2xl p-5 text-sm"
-                style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-border-subtle)' }}
-              >
-                <p className="font-medium mb-3" style={{ color: 'var(--color-text-secondary)' }}>
-                  الأعمدة المدعومة:
+              <div className="rounded-2xl p-6 text-sm bg-white border border-slate-200 shadow-xs">
+                <p className="font-bold text-slate-900 mb-3">
+                  Supported Column Headers:
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-medium">
                   {[
-                    ['الإسم', 'client_name'],
-                    ['رقم الهاتف', 'client_phone / phone / واتساب (اختياري)'],
-                    ['التاريخ', 'date (YYYY-MM-DD أو DD/MM/YYYY)'],
-                    ['الساعة', 'time'],
-                    ['اللوكيشن', 'location'],
-                    ['نوع التصوير', 'session_type'],
-                    ['السعر', 'price'],
-                    ['ملاحظات', 'notes (اختياري)'],
-                  ].map(([ar, en]) => (
-                    <div key={ar} className="flex gap-2">
-                      <span style={{ color: 'var(--color-brand-gold)', minWidth: 90 }}>{ar}</span>
-                      <span style={{ color: 'var(--color-text-muted)' }}>{en}</span>
+                    ['client_name', 'Client name / couple name'],
+                    ['client_phone', 'Phone number / WhatsApp (optional)'],
+                    ['date', 'YYYY-MM-DD or DD/MM/YYYY'],
+                    ['time', 'HH:MM time string'],
+                    ['location', 'Location / venue'],
+                    ['session_type', 'Type of photography session'],
+                    ['price', 'Price numeric or custom text'],
+                    ['notes', 'Additional notes (optional)'],
+                  ].map(([en, desc]) => (
+                    <div key={en} className="flex gap-2">
+                      <span className="text-amber-700 font-bold min-w-[100px]">{en}</span>
+                      <span className="text-slate-500">{desc}</span>
                     </div>
                   ))}
                 </div>
@@ -238,45 +213,38 @@ export default function ImportScreen() {
 
           {step === 'preview' && (
             <motion.div key="preview" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-              <div
-                className="rounded-2xl overflow-hidden mb-4"
-                style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-border-subtle)' }}
-              >
-                <div
-                  className="flex items-center justify-between px-5 py-4"
-                  style={{ borderBottom: '1px solid var(--color-border-subtle)' }}
-                >
-                  <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                    معاينة — {rows.length} جلسة
+              <div className="rounded-2xl overflow-hidden mb-6 bg-white border border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
+                  <h2 className="font-bold text-slate-900">
+                    Preview — {rows.length} {rows.length === 1 ? 'session' : 'sessions'}
                   </h2>
                   <button
                     onClick={() => setStep('upload')}
-                    className="text-sm cursor-pointer"
-                    style={{ color: 'var(--color-text-muted)' }}
+                    className="text-sm font-semibold text-amber-700 hover:underline cursor-pointer"
                     id="import-back-btn"
                   >
-                    تعديل
+                    Edit Input
                   </button>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-xs" dir="rtl">
+                  <table className="w-full text-xs text-left">
                     <thead>
-                      <tr style={{ background: 'var(--color-surface-2)', borderBottom: '1px solid var(--color-border-subtle)' }}>
-                        {['العميل', 'الهاتف', 'التاريخ', 'الوقت', 'النوع', 'اللوكيشن', 'السعر'].map((h) => (
-                          <th key={h} className="px-4 py-2 text-right font-medium" style={{ color: 'var(--color-text-muted)' }}>{h}</th>
+                      <tr className="bg-slate-100/70 border-b border-slate-200 text-slate-600 font-semibold">
+                        {['Client', 'Phone', 'Date', 'Time', 'Type', 'Location', 'Price'].map((h) => (
+                          <th key={h} className="px-4 py-2.5 font-semibold">{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
                       {rows.map((r, i) => (
-                        <tr key={i} style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
-                          <td className="px-4 py-2" style={{ color: 'var(--color-text-primary)' }}>{r.client_name || '—'}</td>
-                          <td className="px-4 py-2 ltr-content" style={{ color: 'var(--color-text-secondary)' }}>{r.client_phone || '—'}</td>
-                          <td className="px-4 py-2 ltr-content" style={{ color: 'var(--color-text-secondary)' }}>{r.date || '—'}</td>
-                          <td className="px-4 py-2 ltr-content" style={{ color: 'var(--color-text-secondary)' }}>{r.time || 'TBD'}</td>
-                          <td className="px-4 py-2" style={{ color: 'var(--color-text-secondary)' }}>{r.session_type || '—'}</td>
-                          <td className="px-4 py-2" style={{ color: 'var(--color-text-secondary)' }}>{r.location || '—'}</td>
-                          <td className="px-4 py-2 ltr-content" style={{ color: 'var(--color-text-secondary)' }}>
+                        <tr key={i} className="border-b border-slate-100 hover:bg-slate-50">
+                          <td className="px-4 py-2.5 font-bold text-slate-900">{r.client_name || '—'}</td>
+                          <td className="px-4 py-2.5 text-slate-600">{r.client_phone || '—'}</td>
+                          <td className="px-4 py-2.5 text-slate-600">{r.date || '—'}</td>
+                          <td className="px-4 py-2.5 text-slate-600">{r.time || 'TBD'}</td>
+                          <td className="px-4 py-2.5 text-slate-600">{r.session_type || '—'}</td>
+                          <td className="px-4 py-2.5 text-slate-600">{r.location || '—'}</td>
+                          <td className="px-4 py-2.5 text-slate-800 font-semibold">
                             {r.price_text || r.price_numeric || '—'}
                           </td>
                         </tr>
@@ -291,22 +259,17 @@ export default function ImportScreen() {
                   id="import-confirm-btn"
                   onClick={handleImport}
                   disabled={loading}
-                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm cursor-pointer transition-all disabled:opacity-60"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--color-brand-gold-dark), var(--color-brand-gold))',
-                    color: '#0a0a0f',
-                  }}
+                  className="flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:from-amber-700 hover:to-amber-600 shadow-md transition-all cursor-pointer disabled:opacity-60"
                 >
-                  {loading ? <Loader2 size={15} className="animate-spin" /> : <Upload size={15} />}
-                  {loading ? 'جارٍ الاستيراد...' : `استيراد ${rows.length} جلسة`}
+                  {loading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+                  {loading ? 'Importing...' : `Import ${rows.length} Sessions`}
                 </button>
                 <button
                   onClick={() => setStep('upload')}
-                  className="px-5 py-3 rounded-xl text-sm cursor-pointer"
-                  style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-secondary)' }}
+                  className="px-5 py-3 rounded-xl text-sm font-semibold bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 transition-colors cursor-pointer"
                   id="import-cancel-btn"
                 >
-                  إلغاء
+                  Cancel
                 </button>
               </div>
             </motion.div>
@@ -314,33 +277,23 @@ export default function ImportScreen() {
 
           {step === 'done' && result && (
             <motion.div key="done" initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}>
-              <div
-                className="rounded-2xl p-10 text-center"
-                style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-border-subtle)' }}
-              >
-                <div
-                  className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5"
-                  style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)' }}
-                >
-                  <Check size={28} className="text-emerald-400" />
+              <div className="rounded-2xl p-10 text-center bg-white border border-slate-200 shadow-lg">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-5 bg-emerald-50 border border-emerald-200">
+                  <Check size={28} className="text-emerald-600" />
                 </div>
-                <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  تم الاستيراد بنجاح
+                <h2 className="text-2xl font-extrabold text-slate-900 mb-2">
+                  Import Completed Successfully
                 </h2>
-                <p style={{ color: 'var(--color-text-secondary)' }}>
-                  تم استيراد <span style={{ color: 'var(--color-brand-gold)' }}>{result.inserted}</span> جلسة
-                  {result.errors > 0 && ` (${result.errors} خطأ)`}
+                <p className="text-slate-600 font-medium">
+                  Successfully imported <span className="font-bold text-amber-700">{result.inserted}</span> sessions
+                  {result.errors > 0 && ` (${result.errors} errors)`}.
                 </p>
                 <a
                   href="/admin"
                   id="import-done-back"
-                  className="inline-flex items-center gap-2 mt-6 px-5 py-2.5 rounded-xl text-sm font-semibold"
-                  style={{
-                    background: 'linear-gradient(135deg, var(--color-brand-gold-dark), var(--color-brand-gold))',
-                    color: '#0a0a0f',
-                  }}
+                  className="inline-flex items-center gap-2 mt-6 px-6 py-3 rounded-xl text-sm font-bold bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:from-amber-700 hover:to-amber-600 shadow-md transition-all"
                 >
-                  <ArrowRight size={14} /> العودة للوحة الإدارة
+                  <ArrowLeft size={16} /> Return to Admin Dashboard
                 </a>
               </div>
             </motion.div>

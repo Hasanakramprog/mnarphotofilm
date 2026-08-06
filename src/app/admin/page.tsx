@@ -63,8 +63,8 @@ export default function AdminDashboard() {
     setFormLoading(true);
     const { error } = await supabase.from('sessions').insert([data]);
     setFormLoading(false);
-    if (error) { showToast('خطأ في إضافة الجلسة', 'error'); return; }
-    showToast('تم إضافة الجلسة بنجاح');
+    if (error) { showToast('Error adding session', 'error'); return; }
+    showToast('Session added successfully');
     setSlideOver(null);
     fetchSessions();
   }
@@ -74,58 +74,52 @@ export default function AdminDashboard() {
     setFormLoading(true);
     const { error } = await supabase.from('sessions').update(data).eq('id', slideOver.session.id);
     setFormLoading(false);
-    if (error) { showToast('خطأ في تعديل الجلسة', 'error'); return; }
-    showToast('تم تعديل الجلسة بنجاح');
+    if (error) { showToast('Error updating session', 'error'); return; }
+    showToast('Session updated successfully');
     setSlideOver(null);
     fetchSessions();
   }
 
   async function handleDeleteSession(id: string) {
     const { error } = await supabase.from('sessions').delete().eq('id', id);
-    if (error) { showToast('خطأ في حذف الجلسة', 'error'); return; }
-    showToast('تم حذف الجلسة');
+    if (error) { showToast('Error deleting session', 'error'); return; }
+    showToast('Session deleted');
     setSlideOver(null);
     fetchSessions();
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-surface-0)' }}>
+    <div className="min-h-screen bg-slate-50">
       {/* Header */}
-      <header
-        className="sticky top-0 z-30 backdrop-blur-md"
-        style={{ background: 'rgba(10,10,15,0.9)', borderBottom: '1px solid var(--color-border-subtle)' }}
-      >
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200 shadow-xs">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
           {/* Brand */}
           <div className="flex items-center gap-3">
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-              style={{ background: 'rgba(201,169,110,0.12)', border: '1px solid rgba(201,169,110,0.25)' }}
-            >
-              <LayoutDashboard size={16} style={{ color: 'var(--color-brand-gold)' }} />
+            <div className="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center flex-shrink-0 text-amber-700">
+              <LayoutDashboard size={18} />
             </div>
-            <span className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
-              لوحة الإدارة
+            <span className="font-bold text-base text-slate-900">
+              Admin Dashboard
             </span>
           </div>
 
           {/* View toggle */}
-          <div className="hidden sm:flex items-center gap-1 rounded-lg p-1" style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-subtle)' }}>
+          <div className="hidden sm:flex items-center gap-1 rounded-xl p-1 bg-slate-100 border border-slate-200">
             {([
-              { value: 'calendar', label: 'تقويم', Icon: Calendar },
-              { value: 'table', label: 'جدول', Icon: Table },
+              { value: 'calendar', label: 'Calendar', Icon: Calendar },
+              { value: 'table', label: 'Table', Icon: Table },
             ] as const).map(({ value, label, Icon }) => (
               <button
                 key={value}
                 id={`admin-view-${value}`}
                 onClick={() => setView(value)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all cursor-pointer"
-                style={{
-                  background: view === value ? 'rgba(201,169,110,0.1)' : 'transparent',
-                  color: view === value ? 'var(--color-brand-gold)' : 'var(--color-text-muted)',
-                }}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                  view === value
+                    ? 'bg-white text-amber-800 shadow-xs border border-amber-300'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
               >
-                <Icon size={13} /> {label}
+                <Icon size={14} /> {label}
               </button>
             ))}
           </div>
@@ -135,21 +129,16 @@ export default function AdminDashboard() {
             <button
               id="admin-add-session-btn"
               onClick={() => setSlideOver({ mode: 'add' })}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer"
-              style={{
-                background: 'linear-gradient(135deg, var(--color-brand-gold-dark), var(--color-brand-gold))',
-                color: '#0a0a0f',
-              }}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold bg-amber-600 text-white hover:bg-amber-700 shadow-sm transition-all cursor-pointer"
             >
-              <Plus size={15} /> إضافة
+              <Plus size={16} /> Add Session
             </button>
 
             <a
               href="/admin/import"
               id="admin-import-link"
-              className="p-2 rounded-xl transition-colors"
-              style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-muted)' }}
-              title="استيراد بيانات"
+              className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 transition-colors"
+              title="Import CSV Data"
             >
               <Upload size={16} />
             </a>
@@ -157,9 +146,8 @@ export default function AdminDashboard() {
             <button
               id="admin-logout-btn"
               onClick={handleLogout}
-              className="p-2 rounded-xl transition-colors cursor-pointer"
-              style={{ background: 'var(--color-surface-2)', border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-muted)' }}
-              title="تسجيل الخروج"
+              className="p-2 rounded-xl bg-slate-100 border border-slate-200 text-slate-600 hover:bg-slate-200 hover:text-rose-600 transition-colors cursor-pointer"
+              title="Logout"
             >
               <LogOut size={16} />
             </button>
@@ -172,18 +160,17 @@ export default function AdminDashboard() {
         {/* Stats row */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'إجمالي الجلسات', value: sessions.length },
-            { label: 'مؤكدة', value: sessions.filter((s) => s.status === 'confirmed').length },
-            { label: 'معلّقة', value: sessions.filter((s) => s.status === 'pending').length },
-            { label: 'مكتملة', value: sessions.filter((s) => s.status === 'completed').length },
-          ].map(({ label, value }, i) => (
+            { label: 'Total Sessions', value: sessions.length },
+            { label: 'Confirmed', value: sessions.filter((s) => s.status === 'confirmed').length },
+            { label: 'Pending', value: sessions.filter((s) => s.status === 'pending').length },
+            { label: 'Completed', value: sessions.filter((s) => s.status === 'completed').length },
+          ].map(({ label, value }) => (
             <div
               key={label}
-              className="rounded-2xl px-5 py-4"
-              style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-border-subtle)' }}
+              className="rounded-2xl px-5 py-4 bg-white border border-slate-200 shadow-xs"
             >
-              <p className="text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>{label}</p>
-              <p className="text-2xl font-bold" style={{ color: 'var(--color-brand-gold)' }}>{loading ? '—' : value}</p>
+              <p className="text-xs font-semibold text-slate-500 mb-1">{label}</p>
+              <p className="text-2xl font-extrabold text-amber-700">{loading ? '—' : value}</p>
             </div>
           ))}
         </div>
@@ -192,7 +179,7 @@ export default function AdminDashboard() {
         {loading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-28 rounded-2xl animate-shimmer" />
+              <div key={i} className="h-28 rounded-2xl bg-slate-200/70 animate-shimmer" />
             ))}
           </div>
         ) : view === 'calendar' ? (
@@ -219,8 +206,7 @@ export default function AdminDashboard() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-40"
-              style={{ background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(4px)' }}
+              className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs"
               onClick={() => setSlideOver(null)}
             />
             <motion.div
@@ -229,15 +215,11 @@ export default function AdminDashboard() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', stiffness: 340, damping: 32 }}
-              className="fixed top-0 right-0 h-full z-50 overflow-y-auto flex flex-col w-full max-w-md shadow-premium-lg"
-              style={{ background: 'var(--color-surface-1)', borderLeft: '1px solid var(--color-border)' }}
+              className="fixed top-0 right-0 h-full z-50 overflow-y-auto flex flex-col w-full max-w-md bg-white border-l border-slate-200 shadow-2xl"
             >
-              <div
-                className="flex items-center justify-between px-6 py-5 flex-shrink-0"
-                style={{ borderBottom: '1px solid var(--color-border-subtle)' }}
-              >
-                <h2 className="font-semibold text-lg" style={{ color: 'var(--color-text-primary)' }}>
-                  {slideOver.mode === 'add' ? 'إضافة جلسة جديدة' : 'تعديل الجلسة'}
+              <div className="flex items-center justify-between px-6 py-5 flex-shrink-0 border-b border-slate-200 bg-slate-50">
+                <h2 className="font-bold text-lg text-slate-900">
+                  {slideOver.mode === 'add' ? 'Add New Session' : 'Edit Session'}
                 </h2>
               </div>
 
@@ -273,12 +255,11 @@ export default function AdminDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] px-5 py-3 rounded-xl text-sm font-medium shadow-premium-lg"
-            style={{
-              background: toast.type === 'success' ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)',
-              border: `1px solid ${toast.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`,
-              color: toast.type === 'success' ? '#34d399' : '#f87171',
-            }}
+            className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] px-5 py-3 rounded-xl text-sm font-bold shadow-xl border ${
+              toast.type === 'success'
+                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                : 'bg-rose-50 text-rose-800 border-rose-300'
+            }`}
           >
             {toast.message}
           </motion.div>

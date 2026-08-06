@@ -10,11 +10,11 @@ interface CalendarViewProps {
   sessions: PublicSession[];
 }
 
-const ARABIC_MONTHS = [
-  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+const ENGLISH_MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
-const ARABIC_WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const ENGLISH_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate();
@@ -80,25 +80,15 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
 
   return (
     <>
-      <div
-        className="rounded-2xl overflow-hidden shadow-premium"
-        style={{
-          background: 'var(--color-surface-1)',
-          border: '1px solid var(--color-border-subtle)',
-        }}
-      >
+      <div className="rounded-2xl overflow-hidden shadow-premium bg-white border border-slate-200">
         {/* Month navigation header */}
-        <div
-          className="flex items-center justify-between px-6 py-5"
-          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}
-        >
+        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200">
           <button
-            onClick={nextMonth}
-            aria-label="الشهر التالي"
-            className="p-2 rounded-lg transition-colors hover:bg-white/5 cursor-pointer"
-            style={{ color: 'var(--color-text-secondary)' }}
+            onClick={prevMonth}
+            aria-label="Previous Month"
+            className="p-2 rounded-lg transition-colors hover:bg-slate-100 text-slate-600 cursor-pointer"
           >
-            <ChevronRight size={20} />
+            <ChevronLeft size={20} />
           </button>
 
           <AnimatePresence mode="wait">
@@ -108,30 +98,27 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 8 }}
               transition={{ duration: 0.2 }}
-              className="text-lg font-semibold"
-              style={{ color: 'var(--color-text-primary)' }}
+              className="text-lg font-bold text-slate-800"
             >
-              {ARABIC_MONTHS[month]} {year}
+              {ENGLISH_MONTHS[month]} {year}
             </motion.h2>
           </AnimatePresence>
 
           <button
-            onClick={prevMonth}
-            aria-label="الشهر السابق"
-            className="p-2 rounded-lg transition-colors hover:bg-white/5 cursor-pointer"
-            style={{ color: 'var(--color-text-secondary)' }}
+            onClick={nextMonth}
+            aria-label="Next Month"
+            className="p-2 rounded-lg transition-colors hover:bg-slate-100 text-slate-600 cursor-pointer"
           >
-            <ChevronLeft size={20} />
+            <ChevronRight size={20} />
           </button>
         </div>
 
         {/* Weekday headers */}
         <div className="grid grid-cols-7 px-4 pt-4">
-          {ARABIC_WEEKDAYS.map((d) => (
+          {ENGLISH_WEEKDAYS.map((d) => (
             <div
               key={d}
-              className="text-center text-xs font-medium pb-3"
-              style={{ color: 'var(--color-text-muted)' }}
+              className="text-center text-xs font-semibold text-slate-400 pb-3"
             >
               {d}
             </div>
@@ -155,36 +142,22 @@ export default function CalendarView({ sessions }: CalendarViewProps) {
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleDayClick(day)}
-                className="relative flex flex-col items-center justify-center rounded-xl aspect-square text-sm font-medium cursor-pointer transition-colors duration-150"
-                style={{
-                  background: isSelected
-                    ? 'rgba(201,169,110,0.18)'
+                className={`relative flex flex-col items-center justify-center rounded-xl aspect-square text-sm font-semibold cursor-pointer transition-colors duration-150 ${
+                  isSelected
+                    ? 'bg-amber-100/80 border border-amber-400 text-amber-900 shadow-sm'
                     : isToday
-                    ? 'rgba(255,255,255,0.04)'
-                    : 'transparent',
-                  border: isSelected
-                    ? '1px solid rgba(201,169,110,0.4)'
-                    : isToday
-                    ? '1px solid rgba(255,255,255,0.08)'
-                    : '1px solid transparent',
-                  color: isSelected
-                    ? 'var(--color-brand-gold)'
-                    : isToday
-                    ? 'var(--color-text-primary)'
-                    : 'var(--color-text-secondary)',
-                }}
-                aria-label={`${day} ${ARABIC_MONTHS[month]}${hasSession ? ` - ${sessionCount} جلسة` : ''}`}
+                    ? 'bg-slate-100 border border-slate-300 text-slate-900 font-bold'
+                    : 'hover:bg-slate-50 text-slate-700'
+                }`}
+                aria-label={`${day} ${ENGLISH_MONTHS[month]}${hasSession ? ` - ${sessionCount} sessions` : ''}`}
               >
                 <span>{day}</span>
                 {hasSession && (
-                  <span
-                    className="absolute bottom-1.5 flex gap-0.5"
-                  >
+                  <span className="absolute bottom-1.5 flex gap-0.5">
                     {Array.from({ length: Math.min(sessionCount, 3) }).map((_, i) => (
                       <span
                         key={i}
-                        className="w-1 h-1 rounded-full"
-                        style={{ background: 'var(--color-brand-gold)' }}
+                        className="w-1.5 h-1.5 rounded-full bg-amber-600 shadow-sm"
                       />
                     ))}
                   </span>

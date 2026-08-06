@@ -12,19 +12,15 @@ interface ViewToggleProps {
 
 export default function ViewToggle({ view, onChange }: ViewToggleProps) {
   const options: { value: ViewMode; label: string; Icon: typeof Calendar }[] = [
-    { value: 'calendar', label: 'التقويم', Icon: Calendar },
-    { value: 'list', label: 'القائمة', Icon: List },
+    { value: 'calendar', label: 'Calendar', Icon: Calendar },
+    { value: 'list', label: 'List', Icon: List },
   ];
 
   return (
     <div
-      className="inline-flex rounded-xl p-1 gap-1"
-      style={{
-        background: 'var(--color-surface-2)',
-        border: '1px solid var(--color-border-subtle)',
-      }}
+      className="inline-flex rounded-xl p-1 gap-1 bg-slate-200/70 border border-slate-300/60"
       role="tablist"
-      aria-label="طريقة العرض"
+      aria-label="View Mode"
     >
       {options.map(({ value, label, Icon }) => {
         const isActive = view === value;
@@ -34,20 +30,15 @@ export default function ViewToggle({ view, onChange }: ViewToggleProps) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(value)}
-            className="relative flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-colors duration-200 cursor-pointer"
-            style={{
-              color: isActive ? 'var(--color-brand-gold)' : 'var(--color-text-muted)',
-            }}
+            className={`relative flex items-center gap-2 rounded-lg px-5 py-2 text-sm font-semibold transition-colors duration-200 cursor-pointer ${
+              isActive ? 'text-amber-800' : 'text-slate-600 hover:text-slate-900'
+            }`}
             id={`view-tab-${value}`}
           >
             {isActive && (
               <motion.span
                 layoutId="view-tab-bg"
-                className="absolute inset-0 rounded-lg"
-                style={{
-                  background: 'rgba(201,169,110,0.08)',
-                  border: '1px solid rgba(201,169,110,0.2)',
-                }}
+                className="absolute inset-0 rounded-lg bg-white shadow-sm border border-amber-300/80"
                 transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
               />
             )}

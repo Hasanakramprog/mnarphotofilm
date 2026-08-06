@@ -1,25 +1,18 @@
 import type { Metadata } from 'next';
-import { Cairo, Inter } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import './globals.css';
-
-const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
-  variable: '--font-cairo',
-  display: 'swap',
-  weight: ['300', '400', '500', '600', '700', '800'],
-});
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
   display: 'swap',
-  weight: ['400', '500', '600'],
+  weight: ['300', '400', '500', '600', '700', '800'],
 });
 
 export const metadata: Metadata = {
-  title: 'Mnar Photofilm | جلسات التصوير',
-  description: 'احجز جلستك مع Mnar Photofilm — جلسات تصوير احترافية بلمسة فنية راقية.',
-  keywords: ['تصوير', 'جلسات تصوير', 'photographer', 'Mnar Photofilm', 'حفلات زفاف'],
+  title: 'Mnar Photofilm | Photo Sessions Schedule',
+  description: 'Book your session with Mnar Photofilm — professional photography with artistic elegance.',
+  keywords: ['photography', 'photo sessions', 'photographer', 'Mnar Photofilm', 'weddings', 'events'],
 };
 
 export default function RootLayout({
@@ -29,11 +22,11 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="ar"
-      dir="rtl"
-      className={`${cairo.variable} ${inter.variable} h-full`}
+      lang="en"
+      dir="ltr"
+      className={`${inter.variable} h-full`}
     >
-      <body className="min-h-full bg-neutral-950 text-neutral-100 antialiased">
+      <body className="min-h-full bg-slate-50 text-slate-900 antialiased">
         {children}
       </body>
     </html>

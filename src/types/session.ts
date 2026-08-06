@@ -23,15 +23,15 @@ export type SessionUpdate = Partial<SessionInsert>;
 export type PublicSession = Omit<Session, 'price_text' | 'price_numeric' | 'notes'>;
 
 export const STATUS_LABELS: Record<SessionStatus, string> = {
-  confirmed: 'مؤكد',
-  pending: 'معلّق',
-  completed: 'مكتمل',
-  cancelled: 'ملغى',
+  confirmed: 'Confirmed',
+  pending: 'Pending',
+  completed: 'Completed',
+  cancelled: 'Cancelled',
 };
 
 export const STATUS_COLORS: Record<SessionStatus, string> = {
-  confirmed: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-  pending: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-  completed: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
-  cancelled: 'bg-red-500/20 text-red-300 border-red-500/30',
+  confirmed: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  pending: 'bg-amber-50 text-amber-700 border-amber-200',
+  completed: 'bg-blue-50 text-blue-700 border-blue-200',
+  cancelled: 'bg-rose-50 text-rose-700 border-rose-200',
 };

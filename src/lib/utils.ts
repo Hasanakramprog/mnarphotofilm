@@ -1,50 +1,61 @@
 import { format, parseISO, getDay } from 'date-fns';
-import { ar } from 'date-fns/locale';
 
-const ARABIC_DAY_NAMES = [
-  'الأحد',
-  'الاثنين',
-  'الثلاثاء',
-  'الأربعاء',
-  'الخميس',
-  'الجمعة',
-  'السبت',
+const DAY_NAMES = [
+  'Sunday',
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
 ];
 
-const ARABIC_MONTH_NAMES = [
-  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-/** Returns Arabic day name derived from a date string YYYY-MM-DD */
+/** Returns English day name derived from a date string YYYY-MM-DD */
 export function getDayOfWeek(dateStr: string): string {
   const date = parseISO(dateStr);
-  return ARABIC_DAY_NAMES[getDay(date)];
+  return DAY_NAMES[getDay(date)];
 }
 
-/** Formats date as "الاثنين، 12 يناير 2026" */
+/** Formats date as "Monday, 12 January 2026" */
 export function formatArabicDate(dateStr: string): string {
-  const date = parseISO(dateStr);
-  const dayName = ARABIC_DAY_NAMES[getDay(date)];
-  const day = date.getDate();
-  const month = ARABIC_MONTH_NAMES[date.getMonth()];
-  const year = date.getFullYear();
-  return `${dayName}، ${day} ${month} ${year}`;
+  return formatDate(dateStr);
 }
 
-/** Formats date as "12 يناير 2026" (no day name) */
+export function formatDate(dateStr: string): string {
+  const date = parseISO(dateStr);
+  const dayName = DAY_NAMES[getDay(date)];
+  const day = date.getDate();
+  const month = MONTH_NAMES[date.getMonth()];
+  const year = date.getFullYear();
+  return `${dayName}, ${day} ${month} ${year}`;
+}
+
+/** Formats date as "12 January 2026" (no day name) */
 export function formatArabicDateShort(dateStr: string): string {
+  return formatDateShort(dateStr);
+}
+
+export function formatDateShort(dateStr: string): string {
   const date = parseISO(dateStr);
   const day = date.getDate();
-  const month = ARABIC_MONTH_NAMES[date.getMonth()];
+  const month = MONTH_NAMES[date.getMonth()];
   const year = date.getFullYear();
   return `${day} ${month} ${year}`;
 }
 
-/** Returns Arabic month + year string, e.g. "يناير 2026" */
+/** Returns English month + year string, e.g. "January 2026" */
 export function getArabicMonthYear(dateStr: string): string {
+  return getMonthYear(dateStr);
+}
+
+export function getMonthYear(dateStr: string): string {
   const date = parseISO(dateStr);
-  return `${ARABIC_MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
+  return `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 /** Returns month key "YYYY-MM" for grouping */
@@ -52,9 +63,9 @@ export function getMonthKey(dateStr: string): string {
   return dateStr.substring(0, 7);
 }
 
-/** Formats time as-is or returns "وقت غير محدد" */
+/** Formats time as-is or returns "Time TBD" */
 export function formatTime(time: string | null): string {
-  if (!time || time.trim() === '') return 'وقت غير محدد';
+  if (!time || !time.trim()) return 'Time TBD';
   return time;
 }
 
@@ -64,7 +75,6 @@ export function parseCSV(text: string): Record<string, string>[] {
   if (lines.length < 2) return [];
   const headers = lines[0].split(',').map((h) => h.trim().replace(/^"|"$/g, ''));
   return lines.slice(1).map((line) => {
-    // Handle quoted fields with commas
     const values: string[] = [];
     let current = '';
     let inQuotes = false;
@@ -89,10 +99,10 @@ export function todayStr(): string {
   return format(new Date(), 'yyyy-MM-dd');
 }
 
-/** Formats a number as currency with ₪ symbol */
+/** Formats a number as currency */
 export function formatPrice(num: number | null, text: string | null): string {
   if (text) return text;
-  if (num != null) return `${num.toLocaleString('ar')} ₪`;
+  if (num != null) return `$${num.toLocaleString('en')}`;
   return '—';
 }
 
@@ -101,7 +111,6 @@ export function formatPhone(phone: string | null | undefined): string | null {
   if (!phone || !phone.trim()) return null;
   let trimmed = phone.trim();
 
-  // If already starts with '+', return as is
   if (trimmed.startsWith('+')) {
     return trimmed;
   }
@@ -109,7 +118,6 @@ export function formatPhone(phone: string | null | undefined): string | null {
   const digits = trimmed.replace(/\D/g, '');
   if (!digits) return trimmed;
 
-  // If starts with country code 961
   if (digits.startsWith('961')) {
     const local = digits.substring(3);
     if (local.startsWith('3') && local.length === 7) {
@@ -121,29 +129,24 @@ export function formatPhone(phone: string | null | undefined): string | null {
     return `+${digits}`;
   }
 
-  // Local 8-digit starting with 03 (e.g. 03123456 -> +961 3 123 456)
   if (digits.startsWith('03') && digits.length === 8) {
     const rest = digits.slice(2);
     return `+961 3 ${rest.slice(0, 3)} ${rest.slice(3)}`;
   }
 
-  // Local number starting with 0 (e.g. 070123456 -> +961 70 123 456)
   if (digits.startsWith('0') && digits.length === 9) {
     const rest = digits.slice(1);
     return `+961 ${rest.slice(0, 2)} ${rest.slice(2, 5)} ${rest.slice(5)}`;
   }
 
-  // Local 8-digit starting with 70, 71, 76, 78, 79, 81, etc.
   if (digits.length === 8) {
     return `+961 ${digits.slice(0, 2)} ${digits.slice(2, 5)} ${digits.slice(5)}`;
   }
 
-  // Local 7-digit starting with 3 (e.g. 3123456 -> +961 3 123 456)
   if (digits.length === 7 && digits.startsWith('3')) {
     return `+961 3 ${digits.slice(1, 4)} ${digits.slice(4)}`;
   }
 
-  // Fallback: prepend +961
   return `+961 ${trimmed}`;
 }
 
@@ -166,5 +169,4 @@ export function getWhatsAppUrl(phone: string | null | undefined): string | null 
   return `https://wa.me/${cleaned}`;
 }
 
-export { format, parseISO, ar };
-
+export { format, parseISO };

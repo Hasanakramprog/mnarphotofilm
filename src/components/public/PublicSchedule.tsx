@@ -21,17 +21,11 @@ export default function PublicSchedule() {
   }, []);
 
   return (
-    <div>
+    <div className="bg-slate-50 min-h-screen">
       <Hero />
 
       {/* Controls bar */}
-      <div
-        className="sticky top-0 z-30 backdrop-blur-md"
-        style={{
-          background: 'rgba(10,10,15,0.85)',
-          borderBottom: '1px solid var(--color-border-subtle)',
-        }}
-      >
+      <div className="sticky top-0 z-30 bg-slate-50/90 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-3 flex justify-center">
           <ViewToggle view={view} onChange={setView} />
         </div>
@@ -44,7 +38,7 @@ export default function PublicSchedule() {
             {[...Array(3)].map((_, i) => (
               <div
                 key={i}
-                className="h-40 rounded-2xl animate-shimmer"
+                className="h-40 rounded-2xl bg-slate-200/70 animate-shimmer"
               />
             ))}
           </div>
@@ -56,16 +50,15 @@ export default function PublicSchedule() {
       </div>
 
       {/* Footer */}
-      <footer className="text-center py-10 mt-8 flex flex-col items-center gap-2" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
-        <p className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-          © {new Date().getFullYear()} Mnar Photofilm — جميع الحقوق محفوظة
+      <footer className="text-center py-10 mt-8 flex flex-col items-center gap-2 border-t border-slate-200 text-slate-500">
+        <p className="text-sm">
+          © {new Date().getFullYear()} Mnar Photofilm — All rights reserved
         </p>
         <a
           href="/admin"
-          className="text-xs transition-colors hover:underline"
-          style={{ color: 'var(--color-text-muted)' }}
+          className="text-xs transition-colors hover:text-amber-700 hover:underline"
         >
-          دخول الإدارة
+          Admin Login
         </a>
       </footer>
     </div>

@@ -2,7 +2,6 @@
 
 export const dynamic = 'force-dynamic';
 
-
 import { useState, FormEvent } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -24,7 +23,7 @@ export default function AdminLoginPage() {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
-      setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+      setError('Invalid email address or password.');
       setLoading(false);
     } else {
       router.push('/admin');
@@ -33,15 +32,12 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'var(--color-surface-0)' }}
-    >
+    <div className="min-h-screen flex items-center justify-center px-4 bg-slate-50 relative overflow-hidden">
       {/* Background glow */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          background: 'radial-gradient(ellipse 60% 40% at 50% 30%, rgba(201,169,110,0.06) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse 60% 40% at 50% 30%, rgba(217,119,6,0.08) 0%, transparent 70%)',
         }}
       />
 
@@ -52,28 +48,16 @@ export default function AdminLoginPage() {
         className="relative w-full max-w-sm"
       >
         {/* Card */}
-        <div
-          className="rounded-2xl p-8 shadow-premium-lg"
-          style={{
-            background: 'var(--color-surface-1)',
-            border: '1px solid var(--color-border)',
-          }}
-        >
+        <div className="rounded-2xl p-8 bg-white border border-slate-200 shadow-xl">
           {/* Logo */}
           <div className="text-center mb-8">
-            <div
-              className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4"
-              style={{
-                background: 'rgba(201,169,110,0.1)',
-                border: '1px solid rgba(201,169,110,0.25)',
-              }}
-            >
-              <span className="text-2xl font-bold" style={{ color: 'var(--color-brand-gold)' }}>م</span>
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4 bg-amber-50 border border-amber-200 shadow-xs">
+              <span className="text-2xl font-bold text-amber-700">M</span>
             </div>
-            <h1 className="text-xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
-              لوحة الإدارة
+            <h1 className="text-xl font-extrabold text-slate-900">
+              Admin Login
             </h1>
-            <p className="text-sm mt-1" style={{ color: 'var(--color-text-muted)' }}>
+            <p className="text-sm mt-1 text-slate-500 font-medium">
               Mnar Photofilm
             </p>
           </div>
@@ -83,10 +67,9 @@ export default function AdminLoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium mb-1.5"
-                style={{ color: 'var(--color-text-secondary)' }}
+                className="block text-sm font-semibold text-slate-700 mb-1.5"
               >
-                البريد الإلكتروني
+                Email Address
               </label>
               <input
                 id="email"
@@ -97,17 +80,15 @@ export default function AdminLoginPage() {
                 placeholder="admin@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                dir="ltr"
               />
             </div>
 
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium mb-1.5"
-                style={{ color: 'var(--color-text-secondary)' }}
+                className="block text-sm font-semibold text-slate-700 mb-1.5"
               >
-                كلمة المرور
+                Password
               </label>
               <div className="relative">
                 <input
@@ -115,18 +96,16 @@ export default function AdminLoginPage() {
                   type={showPw ? 'text' : 'password'}
                   autoComplete="current-password"
                   required
-                  className="input-field pe-12"
+                  className="input-field pr-10"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  dir="ltr"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPw(!showPw)}
-                  className="absolute inset-y-0 end-3 flex items-center px-1 cursor-pointer"
-                  style={{ color: 'var(--color-text-muted)' }}
-                  aria-label={showPw ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                  className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-slate-400 hover:text-slate-600"
+                  aria-label={showPw ? 'Hide password' : 'Show password'}
                 >
                   {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -137,12 +116,7 @@ export default function AdminLoginPage() {
               <motion.p
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-sm text-center py-2.5 px-4 rounded-lg"
-                style={{
-                  background: 'rgba(239,68,68,0.08)',
-                  border: '1px solid rgba(239,68,68,0.2)',
-                  color: '#f87171',
-                }}
+                className="text-sm text-center py-2.5 px-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-medium"
               >
                 {error}
               </motion.p>
@@ -152,16 +126,10 @@ export default function AdminLoginPage() {
               id="login-submit-btn"
               type="submit"
               disabled={loading}
-              className="w-full flex items-center justify-center gap-2 rounded-xl py-3 font-semibold text-sm transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-2"
-              style={{
-                background: loading
-                  ? 'var(--color-surface-3)'
-                  : 'linear-gradient(135deg, var(--color-brand-gold-dark), var(--color-brand-gold))',
-                color: loading ? 'var(--color-text-muted)' : '#0a0a0f',
-              }}
+              className="w-full flex items-center justify-center gap-2 rounded-xl py-3 font-bold text-sm bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:from-amber-700 hover:to-amber-600 shadow-md transition-all duration-200 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed mt-2"
             >
               <LogIn size={16} />
-              {loading ? 'جارٍ الدخول...' : 'تسجيل الدخول'}
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
         </div>
@@ -170,10 +138,9 @@ export default function AdminLoginPage() {
         <div className="text-center mt-5">
           <a
             href="/"
-            className="text-sm transition-colors"
-            style={{ color: 'var(--color-text-muted)' }}
+            className="text-sm font-semibold text-slate-500 hover:text-amber-700 transition-colors"
           >
-            ← العودة إلى الصفحة الرئيسية
+            ← Back to Public Schedule
           </a>
         </div>
       </motion.div>

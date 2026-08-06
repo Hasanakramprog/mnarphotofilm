@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronRight, ChevronLeft, Plus, Phone } from 'lucide-react';
 import type { Session } from '@/types/session';
 import { STATUS_COLORS, STATUS_LABELS } from '@/types/session';
-import { formatTime, formatArabicDate, getWhatsAppUrl, formatPhone } from '@/lib/utils';
+import { formatTime, formatDate, getWhatsAppUrl, formatPhone } from '@/lib/utils';
 
 interface AdminCalendarProps {
   sessions: Session[];
@@ -13,11 +13,11 @@ interface AdminCalendarProps {
   onEditSession: (session: Session) => void;
 }
 
-const ARABIC_MONTHS = [
-  'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-  'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+const ENGLISH_MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
 ];
-const ARABIC_WEEKDAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const ENGLISH_WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function pad(n: number) { return String(n).padStart(2, '0'); }
 
@@ -51,23 +51,17 @@ export default function AdminCalendar({ sessions, onAddSession, onEditSession }:
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Calendar */}
-      <div
-        className="lg:col-span-2 rounded-2xl overflow-hidden"
-        style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-border-subtle)' }}
-      >
+      <div className="lg:col-span-2 rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm">
         {/* Month nav */}
-        <div
-          className="flex items-center justify-between px-6 py-4"
-          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}
-        >
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <button
-            onClick={() => setViewDate(({ year, month }) => month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 })}
-            className="p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-            style={{ color: 'var(--color-text-secondary)' }}
-            aria-label="الشهر التالي"
+            onClick={() => setViewDate(({ year, month }) => month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 })}
+            className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+            aria-label="Previous Month"
           >
-            <ChevronRight size={20} />
+            <ChevronLeft size={20} />
           </button>
+
           <AnimatePresence mode="wait">
             <motion.h2
               key={`${year}-${month}`}
@@ -75,26 +69,25 @@ export default function AdminCalendar({ sessions, onAddSession, onEditSession }:
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 6 }}
               transition={{ duration: 0.18 }}
-              className="font-semibold text-lg"
-              style={{ color: 'var(--color-text-primary)' }}
+              className="font-bold text-lg text-slate-900"
             >
-              {ARABIC_MONTHS[month]} {year}
+              {ENGLISH_MONTHS[month]} {year}
             </motion.h2>
           </AnimatePresence>
+
           <button
-            onClick={() => setViewDate(({ year, month }) => month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 })}
-            className="p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-            style={{ color: 'var(--color-text-secondary)' }}
-            aria-label="الشهر السابق"
+            onClick={() => setViewDate(({ year, month }) => month === 11 ? { year: year + 1, month: 0 } : { year, month: month + 1 })}
+            className="p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors cursor-pointer"
+            aria-label="Next Month"
           >
-            <ChevronLeft size={20} />
+            <ChevronRight size={20} />
           </button>
         </div>
 
         {/* Weekday labels */}
         <div className="grid grid-cols-7 px-4 pt-3">
-          {ARABIC_WEEKDAYS.map((d) => (
-            <div key={d} className="text-center text-xs pb-2 font-medium" style={{ color: 'var(--color-text-muted)' }}>{d}</div>
+          {ENGLISH_WEEKDAYS.map((d) => (
+            <div key={d} className="text-center text-xs pb-2 font-semibold text-slate-400">{d}</div>
           ))}
         </div>
 
@@ -113,17 +106,18 @@ export default function AdminCalendar({ sessions, onAddSession, onEditSession }:
                 whileHover={{ scale: 1.06 }}
                 whileTap={{ scale: 0.94 }}
                 onClick={() => handleDayClick(day)}
-                className="relative flex flex-col items-center justify-start pt-1 rounded-xl min-h-[52px] text-xs font-medium cursor-pointer transition-colors"
-                style={{
-                  background: isSelected ? 'rgba(201,169,110,0.15)' : isToday ? 'rgba(255,255,255,0.04)' : 'transparent',
-                  border: isSelected ? '1px solid rgba(201,169,110,0.35)' : isToday ? '1px solid rgba(255,255,255,0.07)' : '1px solid transparent',
-                  color: isSelected ? 'var(--color-brand-gold)' : 'var(--color-text-secondary)',
-                }}
-                aria-label={`${day} ${ARABIC_MONTHS[month]}${daySess.length ? ` - ${daySess.length} جلسة` : ''}`}
+                className={`relative flex flex-col items-center justify-start pt-1 rounded-xl min-h-[52px] text-xs font-semibold cursor-pointer transition-colors ${
+                  isSelected
+                    ? 'bg-amber-100/90 border border-amber-400 text-amber-900 shadow-xs'
+                    : isToday
+                    ? 'bg-slate-100 border border-slate-300 text-slate-900 font-bold'
+                    : 'hover:bg-slate-50 text-slate-700'
+                }`}
+                aria-label={`${day} ${ENGLISH_MONTHS[month]}${daySess.length ? ` - ${daySess.length} sessions` : ''}`}
               >
                 <span>{day}</span>
                 {daySess.length > 0 && (
-                  <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center px-0.5">
+                  <div className="flex gap-1 mt-1 flex-wrap justify-center px-0.5">
                     {daySess.slice(0, 3).map((s) => (
                       <span
                         key={s.id}
@@ -132,7 +126,7 @@ export default function AdminCalendar({ sessions, onAddSession, onEditSession }:
                           background: s.status === 'confirmed' ? '#10b981'
                             : s.status === 'pending' ? '#f59e0b'
                             : s.status === 'completed' ? '#3b82f6'
-                            : '#6b7280',
+                            : '#ef4444',
                         }}
                       />
                     ))}
@@ -145,29 +139,18 @@ export default function AdminCalendar({ sessions, onAddSession, onEditSession }:
       </div>
 
       {/* Side panel */}
-      <div
-        className="rounded-2xl overflow-hidden flex flex-col"
-        style={{ background: 'var(--color-surface-1)', border: '1px solid var(--color-border-subtle)', minHeight: 300 }}
-      >
-        <div
-          className="flex items-center justify-between px-5 py-4 flex-shrink-0"
-          style={{ borderBottom: '1px solid var(--color-border-subtle)' }}
-        >
-          <h3 className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
-            {selectedDate ? `جلسات ${formatArabicDate(selectedDate)}` : 'اختر يوماً'}
+      <div className="rounded-2xl overflow-hidden flex flex-col bg-white border border-slate-200 shadow-sm min-h-[320px]">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 bg-slate-50">
+          <h3 className="font-bold text-sm text-slate-900">
+            {selectedDate ? `Sessions for ${formatDate(selectedDate)}` : 'Select a date'}
           </h3>
           {selectedDate && (
             <button
               onClick={() => onAddSession(selectedDate)}
               id="admin-calendar-add-btn"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors"
-              style={{
-                background: 'rgba(201,169,110,0.1)',
-                border: '1px solid rgba(201,169,110,0.2)',
-                color: 'var(--color-brand-gold)',
-              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 transition-colors cursor-pointer shadow-xs"
             >
-              <Plus size={13} /> إضافة جلسة
+              <Plus size={13} /> Add Session
             </button>
           )}
         </div>
@@ -175,18 +158,17 @@ export default function AdminCalendar({ sessions, onAddSession, onEditSession }:
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           <AnimatePresence>
             {!selectedDate ? (
-              <p className="text-sm text-center py-8" style={{ color: 'var(--color-text-muted)' }}>
-                اضغط على يوم لعرض جلساته
+              <p className="text-sm text-center py-8 text-slate-500 font-medium">
+                Click on any date to view its sessions
               </p>
             ) : daySessions.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-sm mb-3" style={{ color: 'var(--color-text-muted)' }}>لا توجد جلسات</p>
+                <p className="text-sm mb-3 text-slate-500 font-medium">No sessions on this day</p>
                 <button
                   onClick={() => onAddSession(selectedDate)}
-                  className="text-sm cursor-pointer transition-colors"
-                  style={{ color: 'var(--color-brand-gold)' }}
+                  className="text-sm font-semibold text-amber-700 hover:underline cursor-pointer"
                 >
-                  + إضافة جلسة جديدة
+                  + Add new session
                 </button>
               </div>
             ) : (
@@ -197,38 +179,32 @@ export default function AdminCalendar({ sessions, onAddSession, onEditSession }:
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.06 }}
                   onClick={() => onEditSession(s)}
-                  className="w-full text-right rounded-xl p-4 transition-all cursor-pointer"
-                  style={{
-                    background: 'var(--color-surface-2)',
-                    border: '1px solid var(--color-border-subtle)',
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(201,169,110,0.2)'; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border-subtle)'; }}
+                  className="w-full text-left rounded-xl p-4 bg-slate-50 border border-slate-200/80 hover:border-amber-300 hover:bg-white transition-all cursor-pointer shadow-xs"
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <span className="font-medium text-sm" style={{ color: 'var(--color-text-primary)' }}>
+                    <span className="font-bold text-sm text-slate-900">
                       {s.client_name}
                     </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full border ${STATUS_COLORS[s.status]}`}>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${STATUS_COLORS[s.status]}`}>
                       {STATUS_LABELS[s.status]}
                     </span>
                   </div>
-                  <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>
+                  <p className="text-xs text-slate-600 font-medium">
                     {s.session_type} • {formatTime(s.time)}
                   </p>
 
                   {s.client_phone && (
-                    <div className="mt-2 pt-2 flex items-center justify-between border-t border-white/5 text-xs">
+                    <div className="mt-2 pt-2 flex items-center justify-between border-t border-slate-200 text-xs">
                       <a
                         href={getWhatsAppUrl(s.client_phone) ?? '#'}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
-                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
-                        title="محادثة واتساب"
+                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors font-semibold"
+                        title="Chat on WhatsApp"
                       >
                         <Phone size={11} />
-                        <span className="ltr-content font-medium">{formatPhone(s.client_phone)}</span>
+                        <span>{formatPhone(s.client_phone)}</span>
                       </a>
                     </div>
                   )}

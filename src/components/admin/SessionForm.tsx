@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, type FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import { X, Save, Loader2 } from 'lucide-react';
+import { Save, Loader2 } from 'lucide-react';
 import type { Session, SessionInsert, SessionStatus } from '@/types/session';
 import { motion } from 'framer-motion';
 import { formatPhone } from '@/lib/utils';
@@ -16,20 +15,20 @@ interface SessionFormProps {
 }
 
 const SESSION_TYPES = [
-  'جلسة تصوير',
-  'Full wedding Pack',
-  'تصوير عائلي',
-  'جلسة أطفال',
-  'جلسة خطوبة',
-  'تصوير فيديو',
-  'أخرى',
+  'Photo Shoot',
+  'Full Wedding Pack',
+  'Family Session',
+  'Kids Session',
+  'Engagement Session',
+  'Video Shoot',
+  'Other',
 ];
 
 const STATUS_OPTIONS: { value: SessionStatus; label: string }[] = [
-  { value: 'confirmed', label: 'مؤكد' },
-  { value: 'pending', label: 'معلّق' },
-  { value: 'completed', label: 'مكتمل' },
-  { value: 'cancelled', label: 'ملغى' },
+  { value: 'confirmed', label: 'Confirmed' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' },
 ];
 
 export default function SessionForm({
@@ -90,34 +89,34 @@ export default function SessionForm({
   }
 
   const inputClass = 'input-field';
-  const labelClass = 'block text-sm font-medium mb-1.5';
+  const labelClass = 'block text-sm font-semibold text-slate-700 mb-1.5';
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5" id="session-form">
+    <form onSubmit={handleSubmit} className="space-y-5 text-left" id="session-form">
       {/* Client name + Phone row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="sf-client-name" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-            اسم العميل <span style={{ color: '#f87171' }}>*</span>
+          <label htmlFor="sf-client-name" className={labelClass}>
+            Client Name <span className="text-rose-500">*</span>
           </label>
           <input
             id="sf-client-name"
             type="text"
             required
             className={inputClass}
-            placeholder="اسم العميل أو الثنائي"
+            placeholder="Client or couple name"
             value={form.client_name}
             onChange={(e) => set('client_name', e.target.value)}
           />
         </div>
         <div>
-          <label htmlFor="sf-client-phone" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-            رقم الهاتف / الواتساب
+          <label htmlFor="sf-client-phone" className={labelClass}>
+            Phone / WhatsApp
           </label>
           <input
             id="sf-client-phone"
             type="tel"
-            className={`${inputClass} ltr-content`}
+            className={inputClass}
             placeholder="+961 70 123 456"
             value={form.client_phone ?? ''}
             onChange={(e) => set('client_phone', e.target.value || null)}
@@ -128,26 +127,26 @@ export default function SessionForm({
       {/* Date + Time row */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="sf-date" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-            التاريخ <span style={{ color: '#f87171' }}>*</span>
+          <label htmlFor="sf-date" className={labelClass}>
+            Date <span className="text-rose-500">*</span>
           </label>
           <input
             id="sf-date"
             type="date"
             required
-            className={`${inputClass} ltr-content`}
+            className={inputClass}
             value={form.date}
             onChange={(e) => set('date', e.target.value)}
           />
         </div>
         <div>
-          <label htmlFor="sf-time" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-            الساعة
+          <label htmlFor="sf-time" className={labelClass}>
+            Time
           </label>
           <input
             id="sf-time"
             type="time"
-            className={`${inputClass} ltr-content`}
+            className={inputClass}
             value={form.time ?? ''}
             onChange={(e) => set('time', e.target.value || null)}
           />
@@ -156,8 +155,8 @@ export default function SessionForm({
 
       {/* Session type */}
       <div>
-        <label htmlFor="sf-session-type" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-          نوع التصوير
+        <label htmlFor="sf-session-type" className={labelClass}>
+          Session Type
         </label>
         <select
           id="sf-session-type"
@@ -173,14 +172,14 @@ export default function SessionForm({
 
       {/* Location */}
       <div>
-        <label htmlFor="sf-location" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-          اللوكيشن
+        <label htmlFor="sf-location" className={labelClass}>
+          Location
         </label>
         <input
           id="sf-location"
           type="text"
           className={inputClass}
-          placeholder="مثال: البيت + Outdoor"
+          placeholder="e.g. Studio & Outdoor"
           value={form.location}
           onChange={(e) => set('location', e.target.value)}
         />
@@ -189,28 +188,28 @@ export default function SessionForm({
       {/* Price row */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="sf-price-num" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-            السعر (رقم)
+          <label htmlFor="sf-price-num" className={labelClass}>
+            Price (Numeric $)
           </label>
           <input
             id="sf-price-num"
             type="number"
             step="0.01"
-            className={`${inputClass} ltr-content`}
-            placeholder="230"
+            className={inputClass}
+            placeholder="250"
             value={form.price_numeric ?? ''}
             onChange={(e) => set('price_numeric', e.target.value ? parseFloat(e.target.value) : null)}
           />
         </div>
         <div>
-          <label htmlFor="sf-price-text" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-            السعر (نص حر)
+          <label htmlFor="sf-price-text" className={labelClass}>
+            Price (Custom Text)
           </label>
           <input
             id="sf-price-text"
             type="text"
             className={inputClass}
-            placeholder="230 + 20"
+            placeholder="e.g. 200 + 50 deposit"
             value={form.price_text ?? ''}
             onChange={(e) => set('price_text', e.target.value || null)}
           />
@@ -219,8 +218,8 @@ export default function SessionForm({
 
       {/* Status */}
       <div>
-        <label htmlFor="sf-status" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-          الحالة
+        <label htmlFor="sf-status" className={labelClass}>
+          Status
         </label>
         <select
           id="sf-status"
@@ -236,14 +235,14 @@ export default function SessionForm({
 
       {/* Notes */}
       <div>
-        <label htmlFor="sf-notes" className={labelClass} style={{ color: 'var(--color-text-secondary)' }}>
-          ملاحظات
+        <label htmlFor="sf-notes" className={labelClass}>
+          Notes
         </label>
         <textarea
           id="sf-notes"
           rows={3}
           className={inputClass}
-          placeholder="أي ملاحظات إضافية..."
+          placeholder="Any additional notes or instructions..."
           value={form.notes ?? ''}
           onChange={(e) => set('notes', e.target.value || null)}
           style={{ resize: 'vertical' }}
@@ -256,29 +255,20 @@ export default function SessionForm({
           id="session-form-submit"
           type="submit"
           disabled={isLoading}
-          className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 font-semibold text-sm transition-all duration-200 cursor-pointer disabled:opacity-60"
-          style={{
-            background: 'linear-gradient(135deg, var(--color-brand-gold-dark), var(--color-brand-gold))',
-            color: '#0a0a0f',
-          }}
+          className="flex-1 flex items-center justify-center gap-2 rounded-xl py-3 font-bold text-sm bg-gradient-to-r from-amber-600 to-amber-500 text-white hover:from-amber-700 hover:to-amber-600 shadow-sm transition-all duration-200 cursor-pointer disabled:opacity-60"
         >
           {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-          {isLoading ? 'جارٍ الحفظ...' : 'حفظ'}
+          {isLoading ? 'Saving...' : 'Save Session'}
         </button>
 
         <button
           type="button"
           onClick={onCancel}
           disabled={isLoading}
-          className="px-5 py-3 rounded-xl text-sm font-medium transition-colors duration-200 cursor-pointer disabled:opacity-60"
-          style={{
-            background: 'var(--color-surface-2)',
-            border: '1px solid var(--color-border-subtle)',
-            color: 'var(--color-text-secondary)',
-          }}
+          className="px-5 py-3 rounded-xl text-sm font-semibold bg-slate-100 border border-slate-300 text-slate-700 hover:bg-slate-200 transition-colors duration-200 cursor-pointer disabled:opacity-60"
           id="session-form-cancel"
         >
-          إلغاء
+          Cancel
         </button>
 
         {onDelete && (
@@ -287,19 +277,14 @@ export default function SessionForm({
             onClick={handleDelete}
             disabled={isLoading}
             animate={deleteConfirm ? { scale: [1, 1.02, 1] } : {}}
-            className="px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer disabled:opacity-60"
-            style={{
-              background: deleteConfirm
-                ? 'rgba(239,68,68,0.15)'
-                : 'var(--color-surface-2)',
-              border: deleteConfirm
-                ? '1px solid rgba(239,68,68,0.3)'
-                : '1px solid var(--color-border-subtle)',
-              color: deleteConfirm ? '#f87171' : 'var(--color-text-muted)',
-            }}
+            className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer disabled:opacity-60 ${
+              deleteConfirm
+                ? 'bg-rose-100 text-rose-700 border border-rose-300'
+                : 'bg-slate-100 text-slate-500 border border-slate-200 hover:text-rose-600 hover:bg-rose-50'
+            }`}
             id="session-form-delete"
           >
-            {deleteConfirm ? 'تأكيد الحذف؟' : 'حذف'}
+            {deleteConfirm ? 'Confirm Delete?' : 'Delete'}
           </motion.button>
         )}
       </div>

@@ -4,7 +4,7 @@ import { useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Clock, MapPin, Camera, Phone } from 'lucide-react';
 import type { PublicSession } from '@/types/session';
-import { formatArabicDate, formatTime, getWhatsAppUrl, formatPhone } from '@/lib/utils';
+import { formatDate, formatTime, getWhatsAppUrl, formatPhone } from '@/lib/utils';
 import { STATUS_LABELS, STATUS_COLORS } from '@/types/session';
 
 interface SessionPanelProps {
@@ -43,12 +43,11 @@ export default function SessionPanel({ open, onClose, date, sessions }: SessionP
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed inset-0 z-40"
-            style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+            className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs"
             onClick={onClose}
           />
 
-          {/* Panel — slides in from right (RTL: right side) */}
+          {/* Panel — slides in from right */}
           <motion.div
             key="panel"
             ref={panelRef}
@@ -56,33 +55,25 @@ export default function SessionPanel({ open, onClose, date, sessions }: SessionP
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0 }}
             transition={{ type: 'spring', stiffness: 340, damping: 32 }}
-            className="fixed top-0 right-0 h-full z-50 flex flex-col w-full max-w-sm sm:max-w-md shadow-premium-lg overflow-hidden"
-            style={{
-              background: 'var(--color-surface-1)',
-              borderLeft: '1px solid var(--color-border)',
-            }}
+            className="fixed top-0 right-0 h-full z-50 flex flex-col w-full max-w-sm sm:max-w-md bg-white border-l border-slate-200 shadow-2xl overflow-hidden"
             aria-modal="true"
             role="dialog"
-            aria-label="تفاصيل الجلسات"
+            aria-label="Session Details"
           >
             {/* Header */}
-            <div
-              className="flex items-center justify-between px-6 py-5 flex-shrink-0"
-              style={{ borderBottom: '1px solid var(--color-border-subtle)' }}
-            >
+            <div className="flex items-center justify-between px-6 py-5 flex-shrink-0 border-b border-slate-200 bg-slate-50">
               <div>
-                <p className="text-xs font-medium mb-1" style={{ color: 'var(--color-text-muted)' }}>
-                  جلسات يوم
+                <p className="text-xs font-semibold text-slate-400 mb-0.5">
+                  Sessions for
                 </p>
-                <h2 className="text-lg font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                  {date ? formatArabicDate(date) : ''}
+                <h2 className="text-lg font-bold text-slate-900">
+                  {date ? formatDate(date) : ''}
                 </h2>
               </div>
               <button
                 onClick={onClose}
-                aria-label="إغلاق"
-                className="p-2 rounded-lg transition-colors hover:bg-white/5 cursor-pointer"
-                style={{ color: 'var(--color-text-muted)' }}
+                aria-label="Close"
+                className="p-2 rounded-lg transition-colors hover:bg-slate-200/70 text-slate-500 cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -94,10 +85,9 @@ export default function SessionPanel({ open, onClose, date, sessions }: SessionP
                 <div className="flex flex-col items-center justify-center h-48 text-center">
                   <Camera
                     size={40}
-                    className="mb-4 opacity-20"
-                    style={{ color: 'var(--color-brand-gold)' }}
+                    className="mb-3 opacity-30 text-amber-600"
                   />
-                  <p style={{ color: 'var(--color-text-muted)' }}>لا توجد جلسات في هذا اليوم</p>
+                  <p className="text-slate-500 text-sm font-medium">No sessions scheduled for this day</p>
                 </div>
               ) : (
                 sessions.map((session, i) => (
@@ -106,22 +96,15 @@ export default function SessionPanel({ open, onClose, date, sessions }: SessionP
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.07, duration: 0.35 }}
-                    className="rounded-xl p-5 space-y-3"
-                    style={{
-                      background: 'var(--color-surface-2)',
-                      border: '1px solid var(--color-border-subtle)',
-                    }}
+                    className="rounded-xl p-5 space-y-3 bg-slate-50 border border-slate-200/80 shadow-xs"
                   >
                     {/* Client name + status */}
                     <div className="flex items-start justify-between gap-3">
-                      <h3
-                        className="font-semibold text-lg leading-snug"
-                        style={{ color: 'var(--color-text-primary)' }}
-                      >
+                      <h3 className="font-bold text-lg leading-snug text-slate-900">
                         {session.client_name}
                       </h3>
                       <span
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full border flex-shrink-0 ${STATUS_COLORS[session.status]}`}
+                        className={`text-xs font-semibold px-2.5 py-1 rounded-full border flex-shrink-0 ${STATUS_COLORS[session.status]}`}
                       >
                         {STATUS_LABELS[session.status]}
                       </span>
@@ -129,19 +112,16 @@ export default function SessionPanel({ open, onClose, date, sessions }: SessionP
 
                     {/* Session type */}
                     <div className="flex items-center gap-2">
-                      <Camera size={14} style={{ color: 'var(--color-brand-gold)' }} className="flex-shrink-0" />
-                      <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                      <Camera size={14} className="flex-shrink-0 text-amber-600" />
+                      <span className="text-sm font-medium text-slate-700">
                         {session.session_type}
                       </span>
                     </div>
 
                     {/* Time */}
                     <div className="flex items-center gap-2">
-                      <Clock size={14} style={{ color: 'var(--color-brand-gold)' }} className="flex-shrink-0" />
-                      <span
-                        className="text-sm ltr-content"
-                        style={{ color: 'var(--color-text-secondary)' }}
-                      >
+                      <Clock size={14} className="flex-shrink-0 text-amber-600" />
+                      <span className="text-sm font-medium text-slate-600">
                         {formatTime(session.time)}
                       </span>
                     </div>
@@ -149,16 +129,18 @@ export default function SessionPanel({ open, onClose, date, sessions }: SessionP
                     {/* WhatsApp Phone */}
                     {session.client_phone && (
                       <div className="flex items-center gap-2">
-                        <Phone size={14} className="text-emerald-400 flex-shrink-0" />
+                        <Phone size={14} className="text-emerald-600 flex-shrink-0" />
                         <a
                           href={getWhatsAppUrl(session.client_phone) ?? '#'}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-sm font-medium text-emerald-400 hover:underline ltr-content flex items-center gap-1.5 cursor-pointer"
-                          title="تواصل عبر الواتساب"
+                          className="text-sm font-semibold text-emerald-700 hover:underline flex items-center gap-1.5 cursor-pointer"
+                          title="Chat on WhatsApp"
                         >
                           <span>{formatPhone(session.client_phone)}</span>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">واتساب</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            WhatsApp
+                          </span>
                         </a>
                       </div>
                     )}
@@ -166,8 +148,8 @@ export default function SessionPanel({ open, onClose, date, sessions }: SessionP
                     {/* Location */}
                     {session.location && (
                       <div className="flex items-start gap-2">
-                        <MapPin size={14} style={{ color: 'var(--color-brand-gold)' }} className="flex-shrink-0 mt-0.5" />
-                        <span className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                        <MapPin size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-slate-600">
                           {session.location}
                         </span>
                       </div>
